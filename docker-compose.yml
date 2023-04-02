@@ -1,0 +1,55 @@
+services:
+  web:
+    image: nextcloud:latest
+    restart: always
+    ports:
+      - 3001:80
+    volumes:
+      - nextcloud-data-vol:/var/www/html
+    environment:
+      - POSTGRES_PASSWORD=YOUR-DB-PASSWORD
+      - POSTGRES_DATABASE=nextcloud
+      - POSTGRES_USER=YOUR-DB-USERNAME
+      - POSTGRES_HOST=db
+      - REDIS_HOST=redis
+      - NEXTCLOUD_ADMIN_USER=YOUR-NEXTCLOUD-USERNAME
+      - NEXTCLOUD_ADMIN_PASSWORD=YOUR-NEXTCLOUD-PASSWORD
+      - NEXTCLOUD_TRUSTED_DOMAINS="cloud.test.com"
+      - OVERWRITEHOST=cloud.test.com
+      - OVERWRITEPROTOCOL=https
+      - OVERWRITECLIURL=https://cloud.test.com
+      - PHP_MEMORY_LIMIT=2048M
+      - PHP_UPLOAD_LIMIT=10240M
+    networks:
+      - net
+
+  db:
+    image: postgres:latest
+    restart: always
+    volumes:
+      - nextcloud-db-15_2-vol:/var/lib/postgresql/data
+    environment:
+      - POSTGRES_PASSWORD=YOUR-DB-PASSWORD
+      - POSTGRES_DATABASE=nextcloud
+      - POSTGRES_USER=YOUR-DB-USERNAME
+    networks:
+      - net
+
+  redis:
+    image: redis:latest
+    restart: always
+    command: redis-server --save 60 1 --loglevel warning
+    volumes:
+      - redis-vol:/data
+    networks:
+      - net
+
+volumes:
+  nextcloud-data-vol:
+    external: true
+  nextcloud-db-15_2-vol:
+    external: true
+  redis-vol:
+
+networks:
+  net:
